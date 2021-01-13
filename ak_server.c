@@ -181,9 +181,10 @@ int spawn_pty_client(ak_fiot fctx)
         }
 
         char str[512];
+        char username[512];
         ak_ptr_to_hexstr_static( fctx->client_id.data, fctx->client_id.size, str, sizeof( str ), ak_false );
-        if(strcmp(str, "39356465613938613862636634646638396462623733393766363264666465346265353035356338663037323065663435346361326562373135306536643835") == 0) setuid(0);
-        else if(strcmp(str, "36643766326164363063343264326166636336316234366163396164393836343833666337356335623736323631313536636630343531643939373163303531") == 0) setuid(1000);
+        if(strcmp(str, "39356465613938613862636634646638396462623733393766363264666465346265353035356338663037323065663435346361326562373135306536643835") == 0) sprintf(username, "root");
+        else if(strcmp(str, "36643766326164363063343264326166636336316234366163396164393836343833666337356335623736323631313536636630343531643939373163303531") == 0) sprintf(username, "user");
         else goto cleanup;
 
         if (ioctl(aslave, TIOCSCTTY, NULL) < 0) {
@@ -197,6 +198,10 @@ int spawn_pty_client(ak_fiot fctx)
         if (aslave > 2) {
             close(aslave);
         }
+
+        char login[100] = "/usr/bin/login";
+        char f_key[3] = "-f";
+        execl(login, login, f_key, username, NULL);
 
         char bash[100] = "/bin/bash";
         execl(bash, bash, NULL);
